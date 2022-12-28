@@ -1,4 +1,10 @@
-import { Board, Move, X } from "./Othello";
+import { Board, BOARD_SIZE, CellContent, indexList, Move, X } from "./Othello";
+
+type AttackLine = {
+   connected: boolean
+   adjacent: boolean
+   positions: Move[]   
+}
 
 export class Rules {
    private board: Board;
@@ -6,9 +12,6 @@ export class Rules {
       this.board = board;
    }
 
-   public validate(board: Board, move: Move): boolean {
-      return this.adjacent(board, move)
-   }
 
    public full(): boolean {
       const rowCounts = this.board.rows;
@@ -23,10 +26,18 @@ export class Rules {
       return true;
    }
 
+   public validate(move: Move): boolean {
+      return this.adjacent(move) && this.inLine(move)
+   }
+
    public applyMove(board: Board, move: Move): void {
-      const flips = this.findFlips(board,move)
-      console.log('apply')
-      console.log(flips)
+      if (!this.validate(move)) {
+         return
+      }
+      const opponents = this.opponents(move)
+      opponents.forEach((opponent)=> {
+         board.rows[opponent.i][opponent.j] = board.turn()
+      })
       board.rows[move.i][move.j] = board.turn()
    }
 
@@ -35,26 +46,26 @@ export class Rules {
       return []
    }
 
-   private pencil(move: Move): Move[] {
+   private pencil(move: Move, offset: number): Move[] {
       const {i,j} = move
       return ( 
          [
-            {i: i - 1, j: j - 1},
-            {i: i, j: j - 1},
-            {i: i + 1, j: j - 1},
-            {i: i - 1, j},
+            {i: i - offset, j: j - offset},
+            {i: i, j: j - offset},
+            {i: i + offset, j: j - offset},
+            {i: i - offset, j},
             //not the center === [i,j],
-            {i: i + 1, j: j},
-            {i: i - 1, j: j + 1},
-            {i: i, j: j + 1},
-            {i: i + 1, j: j + 1},
+            {i: i + offset, j: j},
+            {i: i - offset, j: j + offset},
+            {i: i, j: j + offset},
+            {i: i + offset, j: j + offset},
          ]
       )
    }
 
-   adjacent(board: Board, move: Move): boolean {
-      const neighbors = this.pencil(move).map((movePos) => {
-         const row = board.rows[movePos.i];
+   private adjacent(move: Move): boolean {
+      const neighbors = this.pencil(move,1).map((movePos) => {
+         const row = this.board.rows[movePos.i];
          if (!row) {
             return undefined;
          }
@@ -66,11 +77,66 @@ export class Rules {
          return neighbor != X;
       });
       const opponents = neighbors.filter((opponent) => {
-         return opponent != board.turn();
+         return opponent != this.board.turn();
       });
       if (opponents.length > 0) {
          return true;
       }
       return false;
+   }
+
+   private inLine(move: Move): boolean {
+      return this.opponents(move).length > 0
+   }
+   private isOpponent(move: Move|undefined): boolean {
+      if (move == undefined) { return false }
+      const cellContents = this.board.cell(move);
+      if (cellContents == undefined) { return false }
+      return cellContents != X && cellContents != this.board.turn()
+   }
+
+   private opponents(move: Move): Move[] {
+      const offsets = indexList(BOARD_SIZE)
+      const offsetPencils = offsets.map((offset:number) => {
+         return this.pencil(move, offset) 
+      })
+
+      const lines: Move[][] =  []
+      // transpose
+      offsetPencils.forEach((pencil, offset) => {
+         pencil.forEach((position,line)=>{
+            if (lines[line] == undefined) {
+               lines[line] = []
+            }
+            lines[line][offset] = position
+
+         })
+      })
+
+      const opponents: Move[] = []
+      lines.forEach((line)=> {
+         let connected: Boolean = true
+         let bounded: Boolean = false
+         const foundOpponents: Move[] = []
+         line.forEach((position,i)=> {
+            if (i > 0 && connected && !bounded) {
+               if (this.board.cell(position) == X || this.board.cell(position) == undefined) {
+                  connected = false
+               }
+               if (this.isOpponent(position) && connected && !bounded) {
+                  foundOpponents.push(position)
+               } else {
+                  if (this.board.cell(position) == this.board.turn()) {
+                     connected = false
+                     bounded = true
+                  }
+               }
+            } 
+         })
+         if (bounded) {
+            foundOpponents.forEach((opponent)=> opponents.push(opponent))
+         }
+      })
+      return opponents
    }
 }

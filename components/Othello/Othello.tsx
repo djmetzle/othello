@@ -29,7 +29,8 @@ export class Board {
       this.rules = new Rules(this)
    }
    public addPiece(move: Move): Board|undefined {
-      if (!this.validateMove(move)){
+      if (!this.rules.validate(move)) {
+         console.log('move did not validate')
          return
       }
       console.log(`new peice ${move.i},${move.j}`)
@@ -38,23 +39,19 @@ export class Board {
 
       return new Board(this.rows, this.history)
    }
-   public get w(): number {
-      return 0
+   public cell(move: Move): CellContent|undefined {
+      const row = this.rows[move.i]
+      if (!row) {
+         return
+      }
+      return row[move.j]
    }
-   public get b(): number {
-      return 0
-   }
+
    public reset(): void {
       this.history = []
    }
    public turn(): B|W {
       return this.history.length % 2 ? B : W
-   }
-   private validateMove(move: Move): boolean {
-      if (!this.rules.adjacent(this,move)) {
-         return false
-      }
-      return true
    }
 }
 
@@ -78,10 +75,10 @@ function newBoard(): Board {
    return starting
 }
 
-const BOARD_SIZE = 8
-//const BOARD_SIZE = 4
+export const BOARD_SIZE = 8
+//export const BOARD_SIZE = 4
 
-const indexList = (n: number): number[] => Array.from(Array(n).keys())
+export const indexList = (n: number): number[] => Array.from(Array(n).keys())
 
 interface BoardUICommands {
    addPeice: (i:number, j:number) => void;
@@ -95,8 +92,10 @@ function Othello(props: any) {
    const boardCommands: BoardUICommands = {
       addPeice: (i,j) => {
          const nextBoard = board.addPiece({i,j})
-         if (nextBoard) {
-         setBoard(nextBoard)
+         if (nextBoard != undefined) {
+            setBoard(nextBoard)
+         } else {
+            setBoard(board)
          }
       },
       reset: () => {
