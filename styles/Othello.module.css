@@ -1,0 +1,33 @@
+.game {
+    background-color: #CCCCCC;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 1rem;
+    width: 80vh;
+    height: 80vh;
+}
+
+.gameboard {
+    background-color: #CCCCCC;
+    display: flex;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    height: 100%;
+    max-width: 95vmin;
+    max-height: 95vmin;
+}
+
+.cell {
+    aspect-ratio: 1 / 1;
+    border: 1px solid black
+}
+
+.disk {
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    height: 100%;
+}
