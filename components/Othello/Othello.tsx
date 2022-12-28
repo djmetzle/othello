@@ -2,6 +2,7 @@ import { Edu_VIC_WA_NT_Beginner } from "@next/font/google";
 import {createContext, useState} from "react";
 import styles from '../../styles/Othello.module.css'
 import { BoardUI } from './BoardUI';
+import { HeadingUI } from "./HeadingUI";
 import { Rules } from "./Rules";
 
 export type X = ""
@@ -52,6 +53,21 @@ export class Board {
    }
    public turn(): B|W {
       return this.history.length % 2 ? B : W
+   }
+
+   public counts(): [number,number] {
+      let b: number = 0, w: number = 0
+      this.rows.forEach((row)=>{
+         row.forEach((cell) => {
+            if (cell == W) {
+               w++
+            }
+            if (cell == B) {
+               b++
+            }
+         })
+      })
+      return [b,w]
    }
 }
 
@@ -105,6 +121,7 @@ function Othello(props: any) {
    return (
       <div className={styles.game}>
          <BoardCtx.Provider value = {boardCommands}>
+            <HeadingUI board={board}/>
             <BoardUI board={board}/>
          </BoardCtx.Provider>
       </div>

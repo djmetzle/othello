@@ -3,7 +3,7 @@ import { Board, BOARD_SIZE, CellContent, indexList, Move, X } from "./Othello";
 type AttackLine = {
    connected: boolean
    adjacent: boolean
-   positions: Move[]   
+   positions: Move[]
 }
 
 export class Rules {
@@ -48,7 +48,7 @@ export class Rules {
 
    private pencil(move: Move, offset: number): Move[] {
       const {i,j} = move
-      return ( 
+      return (
          [
             {i: i - offset, j: j - offset},
             {i: i, j: j - offset},
@@ -98,7 +98,7 @@ export class Rules {
    private opponents(move: Move): Move[] {
       const offsets = indexList(BOARD_SIZE)
       const offsetPencils = offsets.map((offset:number) => {
-         return this.pencil(move, offset) 
+         return this.pencil(move, offset)
       })
 
       const lines: Move[][] =  []
@@ -131,7 +131,7 @@ export class Rules {
                      bounded = true
                   }
                }
-            } 
+            }
          })
          if (bounded) {
             foundOpponents.forEach((opponent)=> opponents.push(opponent))
