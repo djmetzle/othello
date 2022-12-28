@@ -17,8 +17,13 @@ export type Row = CellContent[]
 type Move = {i:number,j:number}
 
 class Rules {
-   validate(board:Board, i: number, j: number): boolean {
-      return (i%2 == 0) && (j%2 == 0)
+   valoidate(board: Board, i: number, j: number): boolean {
+      const adjancentOpposite: boolean = i == 0
+      //sillyness
+      if ((i%2 == 0) && (j%2 == 0)) { return true }
+
+
+      return false
    }
 }
 
