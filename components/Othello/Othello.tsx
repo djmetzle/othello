@@ -1,6 +1,8 @@
+import { Edu_VIC_WA_NT_Beginner } from "@next/font/google";
 import {createContext, useState} from "react";
 import styles from '../../styles/Othello.module.css'
 import { BoardUI } from './BoardUI';
+import { Rules } from "./Rules";
 
 export type X = ""
 export type B = "B"
@@ -14,18 +16,8 @@ export type CellContent = X | B | W
 
 export type Row = CellContent[]
 
-type Move = {i:number,j:number}
-
-class Rules {
-   valoidate(board: Board, i: number, j: number): boolean {
-      const adjancentOpposite: boolean = i == 0
-      //sillyness
-      if ((i%2 == 0) && (j%2 == 0)) { return true }
-
-
-      return false
-   }
-}
+type Position = {i:number,j:number}
+export type Move = Position
 
 export class Board {
    private history: Move[]
@@ -34,25 +26,35 @@ export class Board {
    constructor(rows: Row[], history: Move[]) {
       this.history = history
       this.rows = rows
-      this.rules = new Rules()
+      this.rules = new Rules(this)
    }
-   public addPiece(i: number, j: number): Board|undefined {
-      if (!this.validatePos(i,j)){
+   public addPiece(move: Move): Board|undefined {
+      if (!this.validateMove(move)){
          return
       }
-      console.log(`new peice ${i},${j}`)
-      this.history.push({i,j})
-      this.rows[i][j] = this.turn()
+      console.log(`new peice ${move.i},${move.j}`)
+      this.rules.applyMove(this, move)
+      this.history.push(move)
+
       return new Board(this.rows, this.history)
+   }
+   public get w(): number {
+      return 0
+   }
+   public get b(): number {
+      return 0
    }
    public reset(): void {
       this.history = []
    }
-   private turn(): B|W {
+   public turn(): B|W {
       return this.history.length % 2 ? B : W
    }
-   private validatePos(i: number, j:number): boolean {
-      return this.rules.validate(this,i,j)
+   private validateMove(move: Move): boolean {
+      if (!this.rules.adjacent(this,move)) {
+         return false
+      }
+      return true
    }
 }
 
@@ -92,7 +94,7 @@ function Othello(props: any) {
    const [board, setBoard] = useState(newBoard());
    const boardCommands: BoardUICommands = {
       addPeice: (i,j) => {
-         const nextBoard = board.addPiece(i,j)
+         const nextBoard = board.addPiece({i,j})
          if (nextBoard) {
          setBoard(nextBoard)
          }
