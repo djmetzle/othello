@@ -5,12 +5,9 @@ type DiskProps = {
    content: CellContent;
 };
 export function Disk(props: DiskProps) {
-   const clicky = () => {
-      console.log('click click');
-   };
    switch (props.content) {
       case "":
-         return (<svg className={styles.disk} onClick={clicky} />
+         return (<svg className={styles.disk} />
          );
       case "B":
          return (<svg className={styles.disk}>
