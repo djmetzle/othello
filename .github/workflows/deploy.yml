@@ -21,6 +21,8 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 18
+    - name: npm install
+      run: npm ci
     - name: run build
       run: npm run build
     - name: test aws
